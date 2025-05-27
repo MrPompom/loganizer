@@ -1,6 +1,6 @@
 package main
 
-import "github.com/MrPompom/gowatcher_tp1/cmd"
+import "go_loganizer/cmd"
 
 func main() {
 	cmd.Execute()

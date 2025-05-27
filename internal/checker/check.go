@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MrPompom/gowatcher_tp1/internal/config"
+	"go_loganizer/internal/config"
 )
 
 type ReportEntry struct {

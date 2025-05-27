@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MrPompom/gowatcher_tp1/internal/checker"
+	"go_loganizer/internal/checker"
 )
 
 func ExportResultToJsonFile(FilePath string, result []checker.ReportEntry) error {
