@@ -29,12 +29,12 @@ var analyzeCmd = &cobra.Command{
 
 		targets, err := config.LoadTargetsFromFile(inputFilePath)
 		if err != nil {
-			fmt.Printf("Erreur lors du chargement des URLs: %v\n", err)
+			fmt.Printf("Erreur lors du chargement des fichiers de log: %v\n", err)
 			return
 		}
 
 		if len(targets) == 0 {
-			fmt.Println("Aucune URL à vérifier trouvée dans le fichier d'entrée.")
+			fmt.Println("Aucune Log à vérifier trouvée dans le fichier d'entrée.")
 			return
 		}
 		var wg sync.WaitGroup
@@ -55,16 +55,27 @@ var analyzeCmd = &cobra.Command{
 			reportEntry := analyzer.ConvertToReportEntry(res)
 			finalReport = append(finalReport, reportEntry)
 
+			status := "OK"
+			msg := res.Message
+			errMsg := ""
 			if res.Err != nil {
-				var unreachable *analyzer.NonExistingFileError
-				if errors.As(res.Err, &unreachable) {
-					fmt.Printf("KO %s (%s) est inaccessible : %v\n", res.InputTarget.ID, unreachable.Path, unreachable.Err)
-				} else {
-					fmt.Printf("KO %s (%s) : erreur - %v\n", res.InputTarget.ID, res.InputTarget.Path, res.Err)
+				status = "KO"
+				var fileErr *analyzer.NonExistingFileError
+				var parseErr *analyzer.ParsingError
+				switch {
+				case errors.As(res.Err, &fileErr):
+					errMsg = fmt.Sprintf("Fichier introuvable/inaccessible: %v", fileErr.Err)
+				case errors.As(res.Err, &parseErr):
+					errMsg = fmt.Sprintf("Erreur de parsing: %v", parseErr.Err)
+				default:
+					errMsg = fmt.Sprintf("Autre erreur: %v", res.Err)
 				}
-			} else {
-				fmt.Printf("OK %s (%s) : OK - %s\n", res.InputTarget.ID, res.InputTarget.Path, res.Status)
 			}
+			fmt.Printf("Résumé: ID=%s | Chemin=%s | Statut=%s | Message=%s", res.InputTarget.ID, res.InputTarget.Path, status, msg)
+			if errMsg != "" {
+				fmt.Printf(" | Erreur=%s", errMsg)
+			}
+			fmt.Println()
 		}
 		if outputFilePath != "" {
 			err := reporter.ExportResultToJsonFile(outputFilePath, finalReport)
@@ -83,5 +94,4 @@ func init() {
 	analyzeCmd.Flags().StringVarP(&inputFilePath, "config", "c", "", "Chemin vers le fichier JSON d'entrée")
 	analyzeCmd.Flags().StringVarP(&outputFilePath, "output", "o", "", "Chemin vers le fichier JSON de sortie pour les résultats")
 	analyzeCmd.MarkFlagRequired("config")
-	analyzeCmd.MarkFlagRequired("output")
 }
