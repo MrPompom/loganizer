@@ -3,11 +3,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"go_loganizer/internal/analyzer"
+	"go_loganizer/internal/config"
+	"go_loganizer/internal/reporter"
 	"sync"
 
-	"github.com/MrPompom/gowatcher_tp1/internal/checker"
-	"github.com/MrPompom/gowatcher_tp1/internal/config"
-	"github.com/MrPompom/gowatcher_tp1/internal/reporter"
 	"github.com/spf13/cobra"
 )
 
@@ -16,10 +16,10 @@ var (
 	outputFilePath string
 )
 
-var checkCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Vérifie l'accessibilité d'une liste d'URLs.",
-	Long:  `La commande 'check' parcourt une liste prédéfinie d'URLs et affiche leur statut d'accessibilité en utilisant des goroutines pour la concurrence.`,
+var analyzeCmd = &cobra.Command{
+	Use:   "analyze",
+	Short: "Analyse une liste de log",
+	Long:  `La commande 'analyze' permet d'analyser un fichier de log et d'en extraire des informations pertinentes.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if inputFilePath == "" {
@@ -27,7 +27,6 @@ var checkCmd = &cobra.Command{
 			return
 		}
 
-		// Charger les "cibles" depuis le fichier JSON d'entrée
 		targets, err := config.LoadTargetsFromFile(inputFilePath)
 		if err != nil {
 			fmt.Printf("Erreur lors du chargement des URLs: %v\n", err)
@@ -38,39 +37,33 @@ var checkCmd = &cobra.Command{
 			fmt.Println("Aucune URL à vérifier trouvée dans le fichier d'entrée.")
 			return
 		}
-		// Compteur de goroutine en attente
 		var wg sync.WaitGroup
-		resultsChan := make(chan checker.CheckResult, len(targets)) // Canal pour collecter les résultats
-		// On initialise/compte le nombre de goroutines attendues
+		resultsChan := make(chan analyzer.CheckResult, len(targets))
 		wg.Add(len(targets))
 		for _, target := range targets {
-			// On lance une fonction annonyme qui prend en paramètre une copie de url
 			go func(t config.InputTarget) {
-				result := checker.CheckURL(t)
-				resultsChan <- result // On envoie le resultat au canal
-				// Garantit qu'à la fin de la fonction, le compteur wg sera décrémenté de 1, `
-				// signalant que la Go routine est terminée
+				result := analyzer.CheckLog(t)
+				resultsChan <- result
 				defer wg.Done()
 			}(target)
 		}
-		// Bloque l'exécution du main() jusqu'à ce que toutes les goroutines aient appelé wg.Done()
 		wg.Wait()
 		close(resultsChan)
 
-		var finalReport []checker.ReportEntry
+		var finalReport []analyzer.ReportEntry
 		for res := range resultsChan {
-			reportEntry := checker.ConvertToReportEntry(res)
+			reportEntry := analyzer.ConvertToReportEntry(res)
 			finalReport = append(finalReport, reportEntry)
 
 			if res.Err != nil {
-				var unreachable *checker.UnreachableURLError
+				var unreachable *analyzer.NonExistingFileError
 				if errors.As(res.Err, &unreachable) {
-					fmt.Printf("KO %s (%s) est inaccessible : %v\n", res.InputTarget.Name, unreachable.URL, unreachable.Err)
+					fmt.Printf("KO %s (%s) est inaccessible : %v\n", res.InputTarget.ID, unreachable.Path, unreachable.Err)
 				} else {
-					fmt.Printf("KO %s (%s) : erreur - %v\n", res.InputTarget.Name, res.InputTarget.URL, res.Err)
+					fmt.Printf("KO %s (%s) : erreur - %v\n", res.InputTarget.ID, res.InputTarget.Path, res.Err)
 				}
 			} else {
-				fmt.Printf("OK %s (%s) : OK - %s\n", res.InputTarget.Name, res.InputTarget.URL, res.Status)
+				fmt.Printf("OK %s (%s) : OK - %s\n", res.InputTarget.ID, res.InputTarget.Path, res.Status)
 			}
 		}
 		if outputFilePath != "" {
@@ -86,16 +79,9 @@ var checkCmd = &cobra.Command{
 }
 
 func init() {
-	// elle "ajoute" la sous-commande `checkCmd` à la commande racine `rootCmd`
-	// C'est ainsi que Cobra sait que 'check' est une commande valide sous 'gowatcher'.
-	rootCmd.AddCommand(checkCmd)
-
-	checkCmd.Flags().StringVarP(&inputFilePath, "input", "i", "", "Chemin vers le fichier JSON d'entrée contenant les URLS")
-
-	checkCmd.Flags().StringVarP(&outputFilePath, "output", "o", "", "Chemin vers le fichier JSON de sortie pour les résultats")
-
-	// Marquer le drapeau "input" comme obligatoire
-	checkCmd.MarkFlagRequired("input")
-
-	checkCmd.MarkFlagRequired("output")
+	rootCmd.AddCommand(analyzeCmd)
+	analyzeCmd.Flags().StringVarP(&inputFilePath, "config", "c", "", "Chemin vers le fichier JSON d'entrée")
+	analyzeCmd.Flags().StringVarP(&outputFilePath, "output", "o", "", "Chemin vers le fichier JSON de sortie pour les résultats")
+	analyzeCmd.MarkFlagRequired("config")
+	analyzeCmd.MarkFlagRequired("output")
 }

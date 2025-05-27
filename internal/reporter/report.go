@@ -3,12 +3,11 @@ package reporter
 import (
 	"encoding/json"
 	"fmt"
+	"go_loganizer/internal/analyzer"
 	"os"
-
-	"go_loganizer/internal/checker"
 )
 
-func ExportResultToJsonFile(FilePath string, result []checker.ReportEntry) error {
+func ExportResultToJsonFile(FilePath string, result []analyzer.ReportEntry) error {
 	// Convert the result to JSON format
 	data, err := json.MarshalIndent(result, "", " ")
 	if err != nil {

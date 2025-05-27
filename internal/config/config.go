@@ -7,9 +7,9 @@ import (
 )
 
 type InputTarget struct {
-	Name  string `json:"name"`
-	URL   string `json:"url"`
-	Owner string `json:"owner"`
+	ID   string `json:"id"`
+	Path string `json:"path"`
+	Type string `json:"type"`
 }
 
 func LoadTargetsFromFile(filePath string) ([]InputTarget, error) {
