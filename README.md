@@ -302,43 +302,11 @@ Les messages d'erreur sont explicites et incluent :
 
 ---
 
-## 🎁 Fonctionnalités bonus (Future)
-
-### Fonctionnalités prévues
-
-1. **Gestion des dossiers d'exportation**
-   - Création automatique des répertoires de sortie
-   - Support des chemins relatifs et absolus
-
-2. **Horodatage des exports**
-   - Nommage automatique avec timestamp
-   - Format : `AAMMJJ_report.json`
-
-3. **Commande `add-log`**
-   - Ajout interactif de nouvelles configurations
-   - Validation en temps réel
-
-4. **Filtrage des résultats**
-   - Flag `--status` pour filtrer par statut
-   - Support des expressions régulières
-
----
-
-## 👥 Équipe de développement
-
-| Rôle | Nom | Responsabilités |
-|------|-----|----------------|
-| **Lead Developer** | [Votre Nom] | Architecture, CLI, Documentation |
-| **Backend Developer** | [Nom du coéquipier 1] | Analyzer, Gestion d'erreurs |
-| **DevOps** | [Nom du coéquipier 2] | Tests, Configuration, Reporter |
-
 ### Contributions
 
-- **Architecture** : Conception modulaire et packages internes
-- **Concurrence** : Implémentation des goroutines et synchronisation
-- **CLI** : Interface utilisateur avec Cobra
-- **Testing** : Scénarios de test et validation
-- **Documentation** : README, commentaires de code, exemples
+- **Bastien Prompsy**
+- **Timothé Bonifacio**
+- **Nicolas Bidet**
 
 ---
 
@@ -360,35 +328,3 @@ Les messages d'erreur sont explicites et incluent :
 - [Effective Go](https://go.dev/doc/effective_go)
 - [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 - [Standard Go Project Layout](https://github.com/golang-standards/project-layout)
-
----
-
-## 📄 License
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
----
-
-## 🤝 Contributing
-
-Les contributions sont les bienvenues ! Pour contribuer :
-
-1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit vos changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
-
----
-
-## 📞 Support
-
-Pour toute question ou problème :
-
-- Ouvrir une [issue](https://github.com/votre-username/go_loganizer/issues)
-- Contacter l'équipe de développement
-- Consulter la [documentation](./docs/)
-
----
-
-**Made with ❤️ by [Nom de votre équipe]**
