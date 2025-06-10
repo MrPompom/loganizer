@@ -11,11 +11,11 @@ import (
 )
 
 type ReportEntry struct {
-	log_id        string
-	file_path     string
-	status        string
-	message       string
-	error_details string
+	Log_id        string
+	File_path     string
+	Status        string
+	Message       string
+	Error_details string
 }
 type CheckResult struct {
 	InputTarget config.InputTarget
@@ -51,35 +51,35 @@ func CheckLog(target config.InputTarget) CheckResult { // TO DO : modifier pour 
 
 	return CheckResult{
 		InputTarget: target,
-		Status:      "SUCCESS",
+		Status:      "OK",
 		Message:     "Analyse terminée avec succès.",
 	}
 }
 
 func ConvertToReportEntry(res CheckResult) ReportEntry {
 	report := ReportEntry{
-		log_id:        res.InputTarget.ID,
-		file_path:     res.InputTarget.Path,
-		status:        res.Status,
-		message:       res.Message,
-		error_details: "",
+		Log_id:        res.InputTarget.ID,
+		File_path:     res.InputTarget.Path,
+		Status:        res.Status,
+		Message:       res.Message,
+		Error_details: "",
 	}
 	if res.Err != nil {
 		var nonExistingFileErr *NonExistingFileError
 		var parsingErr *ParsingError
 		switch {
 		case errors.As(res.Err, &nonExistingFileErr):
-			report.status = "FAILED"
-			report.message = "Fichier introuvable ou inaccessible."
-			report.error_details = fmt.Sprintf("open %v: %v", nonExistingFileErr.Path, nonExistingFileErr.Err)
+			report.Status = "FAILED"
+			report.Message = "Fichier introuvable ou inaccessible."
+			report.Error_details = fmt.Sprintf("open %v: %v", nonExistingFileErr.Path, nonExistingFileErr.Err)
 		case errors.As(res.Err, &parsingErr):
-			report.status = "FAILED"
-			report.message = "Erreur de parsing."
-			report.error_details = fmt.Sprintf("Erreur de parsing: %v", parsingErr.Err)
+			report.Status = "FAILED"
+			report.Message = "Erreur de parsing."
+			report.Error_details = fmt.Sprintf("Erreur de parsing: %v", parsingErr.Err)
 		default:
-			report.status = "FAILED"
-			report.message = "Erreur lors de l'analyse."
-			report.error_details = fmt.Sprintf("Erreur: %v", res.Err)
+			report.Status = "FAILED"
+			report.Message = "Erreur lors de l'analyse."
+			report.Error_details = fmt.Sprintf("Erreur: %v", res.Err)
 		}
 	}
 	return report
